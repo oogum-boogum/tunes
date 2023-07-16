@@ -1,13 +1,48 @@
-const Http = new XMLHttpRequest();
-const url =
-  "https://raw.githubusercontent.com/oogum-boogum/tunes/main/abc/spoon.abc";
-Http.open("GET", url);
-Http.send();
-let abc = "";
-Http.onreadystatechange = (e) => {
-  console.log(Http.responseText);
-  abc = Http.responseText;
+fetch("https://api.github.com/repos/oogum-boogum/tunes/contents/abc")
+  .then((response) => response.json())
+  .then((json) => getScores(json))
+  .then((scores) => renderPage(scores))
+  .then(() => initAbc());
 
+async function getScores(files) {
+  return Promise.all(
+    files.map(async (file) => {
+      return await fetch(file.download_url).then((response) => response.text());
+    })
+  ).then((responses) => {
+    let scores = {};
+
+    responses.forEach((response) => {
+      let scoreName = response
+        .split("\n")
+        .filter((line) => line.startsWith("T:"))[0]
+        .split(":")[1];
+      scores[scoreName] = response;
+    });
+
+    console.log("Fetched scores", scores);
+    return scores;
+  });
+}
+
+function renderPage(scores) {
+  let scoreList = document.getElementById("scoreList");
+
+  Object.keys(scores).forEach((scoreName) => {
+    let li = document.createElement("li");
+    li.innerHTML = scoreName;
+    li.addEventListener("click", (e) => renderScore(scores[scoreName]));
+
+    scoreList.appendChild(li);
+  });
+}
+
+function renderScore(score) {
+  setTune(score);
+  console.log(score);
+}
+
+function initAbc() {
   if (ABCJS.synth.supportsAudio()) {
     synthControl = new ABCJS.synth.SynthController();
     synthControl.load("#audio", cursorControl, {
@@ -21,8 +56,9 @@ Http.onreadystatechange = (e) => {
     document.querySelector("#audio").innerHTML =
       "<div class='audio-error'>Audio is not supported in this browser.</div>";
   }
-  setTune(false);
-};
+}
+
+let abc = "";
 
 var abcOptions = {
   add_classes: true,
@@ -86,9 +122,9 @@ var cursorControl = new CursorControl();
 
 var synthControl;
 
-function setTune(userAction) {
+function setTune(tune) {
   synthControl.disable(true);
-  var visualObj = ABCJS.renderAbc("paper", abc, abcOptions)[0];
+  var visualObj = ABCJS.renderAbc("paper", tune, abcOptions)[0];
 
   var midiBuffer = new ABCJS.synth.CreateSynth();
   midiBuffer
@@ -99,7 +135,7 @@ function setTune(userAction) {
       console.log(response);
       if (synthControl) {
         synthControl
-          .setTune(visualObj, userAction)
+          .setTune(visualObj, false)
           .then(function (response) {
             console.log("Audio successfully loaded.");
           })

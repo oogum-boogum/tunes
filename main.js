@@ -38,7 +38,7 @@ function renderPage(scores) {
 }
 
 function renderScore(score) {
-  setTune(score);
+  setTune(score, true);
   console.log(score);
 }
 
@@ -122,7 +122,7 @@ var cursorControl = new CursorControl();
 
 var synthControl;
 
-function setTune(tune) {
+function setTune(tune, userAction) {
   synthControl.disable(true);
   var visualObj = ABCJS.renderAbc("paper", tune, abcOptions)[0];
 
@@ -135,7 +135,7 @@ function setTune(tune) {
       console.log(response);
       if (synthControl) {
         synthControl
-          .setTune(visualObj, false)
+          .setTune(visualObj, userAction)
           .then(function (response) {
             console.log("Audio successfully loaded.");
           })

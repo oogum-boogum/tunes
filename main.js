@@ -1,45 +1,39 @@
 fetch("https://api.github.com/repos/oogum-boogum/tunes/contents/abc")
   .then((response) => response.json())
-  .then((json) => getScores(json))
-  .then((scores) => renderPage(scores))
+  .then((json) => getTunes(json))
+  .then((tunes) => renderPage(tunes))
   .then(() => initAbc());
 
-async function getScores(files) {
+async function getTunes(files) {
   return Promise.all(
     files.map(async (file) => {
       return await fetch(file.download_url).then((response) => response.text());
     })
   ).then((responses) => {
-    let scores = {};
+    let tunes = {};
 
     responses.forEach((response) => {
-      let scoreName = response
+      let tuneName = response
         .split("\n")
         .filter((line) => line.startsWith("T:"))[0]
         .split(":")[1];
-      scores[scoreName] = response;
+      tunes[tuneName] = response;
     });
 
-    console.log("Fetched scores", scores);
-    return scores;
+    return tunes;
   });
 }
 
-function renderPage(scores) {
-  let scoreList = document.getElementById("scoreList");
+function renderPage(tunes) {
+  let tuneList = document.getElementById("tune-list");
 
-  Object.keys(scores).forEach((scoreName) => {
+  Object.keys(tunes).forEach((tuneName) => {
     let li = document.createElement("li");
-    li.innerHTML = scoreName;
-    li.addEventListener("click", (e) => renderScore(scores[scoreName]));
+    li.innerHTML = tuneName;
+    li.addEventListener("click", (e) => setTune(tunes[tuneName]));
 
-    scoreList.appendChild(li);
+    tuneList.appendChild(li);
   });
-}
-
-function renderScore(score) {
-  setTune(score, true);
-  console.log(score);
 }
 
 function initAbc() {
@@ -57,8 +51,6 @@ function initAbc() {
       "<div class='audio-error'>Audio is not supported in this browser.</div>";
   }
 }
-
-let abc = "";
 
 var abcOptions = {
   add_classes: true,
@@ -122,7 +114,7 @@ var cursorControl = new CursorControl();
 
 var synthControl;
 
-function setTune(tune, userAction) {
+function setTune(tune) {
   synthControl.disable(true);
   var visualObj = ABCJS.renderAbc("paper", tune, abcOptions)[0];
 
@@ -132,11 +124,11 @@ function setTune(tune, userAction) {
       visualObj: visualObj,
     })
     .then(function (response) {
-      console.log(response);
       if (synthControl) {
         synthControl
-          .setTune(visualObj, userAction)
+          .setTune(visualObj, true)
           .then(function (response) {
+            document.getElementById("audio").classList.remove("hidden");
             console.log("Audio successfully loaded.");
           })
           .catch(function (error) {

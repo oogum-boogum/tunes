@@ -1,3 +1,28 @@
-#scoreList li {
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-family: "Lucida Sans", sans-serif;
+}
+
+.container {
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+aside {
+    width:20%;
+}
+
+main {
+    width: 60%;
+}
+
+#audio.hidden {
+    visibility: hidden;
+}
+
+#tune-list li {
     cursor: pointer;
 }

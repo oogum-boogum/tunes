@@ -14,22 +14,23 @@
       }
     </style>
 
-
-    <link rel="stylesheet" href="vendored/abcjs-audio.css"/>
+    <link rel="stylesheet" href="vendored/abcjs-audio.css" />
     <script src="vendored/abcjs-basic-min.js" type="text/javascript"></script>
 
-    <link rel="stylesheet" href="styles.css"/>
+    <link rel="stylesheet" href="styles.css" />
     <script src="main.js" type="text/javascript"></script>
   </head>
   <body>
     <div class="container">
-      <aside>
+      <aside class="menu">
         <p>Tunes:</p>
-        <ul id="scoreList"></ul></aside>
+        <ul id="tune-list"></ul>
+      </aside>
       <main>
-        <div id="audio"></div>
         <div id="paper"></div>
+        <div id="audio" class="hidden"></div>
       </main>
+      <aside></aside>
     </div>
   </body>
 </html>
